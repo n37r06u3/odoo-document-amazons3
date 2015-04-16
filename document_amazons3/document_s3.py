@@ -31,7 +31,6 @@ _logger = logging.getLogger(__name__)
 
 
 class DocumentAmazonS3(orm.Model):
-    _name = 'ir.attachment'
     _inherit = 'ir.attachment'
 
     def _s3_connection_and_bucket(self, location):

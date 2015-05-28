@@ -109,7 +109,7 @@ class DocumentAmazonS3(orm.Model):
                     s3_key.delete()
                 except Exception, e:
                     _logger.error("_file_delete could not unlink %s"
-                                  " from S3. Error: %s") % (fname, e.message)
+                                  " from S3. Error: %s" % (fname, e.message))
         else:
             return super(DocumentAmazonS3, self)._file_delete(
                 cr, uid, fname)

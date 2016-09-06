@@ -56,7 +56,8 @@ class DocumentAmazonS3(orm.Model):
 
         return s3_bucket
 
-    def _file_read(self, cr, uid, location, fname, bin_size=False):
+    def _file_read(self, cr, uid, fname, bin_size=False):
+        location = self._storage(cr, uid)
         loc_parse = urlparse.urlparse(location)
         if loc_parse.scheme == 'amazons3':
             s3_bucket = self._s3_connection_and_bucket(location)
@@ -70,10 +71,11 @@ class DocumentAmazonS3(orm.Model):
                 read = base64.b64encode(s3_key.get_contents_as_string())
         else:
             read = super(DocumentAmazonS3, self)._file_read(
-                cr, uid, location, fname, bin_size=bin_size)
+                cr, uid, fname, bin_size=bin_size)
         return read
 
-    def _file_write(self, cr, uid, location, value):
+    def _file_write(self, cr, uid, value):
+        location = self._storage(cr, uid)
         loc_parse = urlparse.urlparse(location)
         if loc_parse.scheme == 'amazons3':
             s3_bucket = self._s3_connection_and_bucket(location)
@@ -87,11 +89,12 @@ class DocumentAmazonS3(orm.Model):
             s3_key.set_contents_from_string(bin_value)
         else:
             fname = super(DocumentAmazonS3, self)._file_write(
-                cr, uid, location, value)
+                cr, uid, value)
 
         return fname
 
-    def _file_delete(self, cr, uid, location, fname):
+    def _file_delete(self, cr, uid, fname):
+        location = self._storage(cr, uid)
         loc_parse = urlparse.urlparse(location)
         if loc_parse.scheme == 'amazons3':
             count = self.search(cr, SUPERUSER_ID, [
@@ -106,10 +109,10 @@ class DocumentAmazonS3(orm.Model):
                     s3_key.delete()
                 except Exception, e:
                     _logger.error("_file_delete could not unlink %s"
-                                  " from S3. Error: %s") % (fname, e.message)
+                                  " from S3. Error: %s" % (fname, e.message))
         else:
             return super(DocumentAmazonS3, self)._file_delete(
-                cr, uid, location, fname)
+                cr, uid, fname)
 
     def get_s3_url(self, cr, uid, att_id, expires_in=600, context=None):
         if context is None:
